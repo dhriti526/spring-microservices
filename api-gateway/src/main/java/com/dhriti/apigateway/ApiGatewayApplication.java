@@ -1,7 +1,12 @@
-package com.dhriti.microservice;
+package com.dhriti.apigateway;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
-public class Main {
+@SpringBootApplication
+@EnableEurekaClient
+public class ApiGatewayApplication {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        SpringApplication.run(ApiGatewayApplication.class, args);
     }
 }
