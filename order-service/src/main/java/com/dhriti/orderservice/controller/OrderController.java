@@ -2,6 +2,7 @@ package com.dhriti.orderservice.controller;
 
 import java.util.List;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class OrderController {
 	private OrderService orderService;
 
 	@PostMapping
+	@CircuitBreaker(name = "inventory")
 	private ResponseEntity<String> orderRequest(@RequestBody List<OrderLineItemsDTO> orderLineItemsDTO)	{
 		orderService.createOrderRequest(orderLineItemsDTO);
 		return new ResponseEntity<String>("order placed successfully", HttpStatus.CREATED);
