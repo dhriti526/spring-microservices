@@ -3,6 +3,7 @@ package com.dhriti.orderservice.controller;
 import java.util.List;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,13 @@ public class OrderController {
 	private OrderService orderService;
 
 	@PostMapping
-	@CircuitBreaker(name = "inventory")
-	private ResponseEntity<String> orderRequest(@RequestBody List<OrderLineItemsDTO> orderLineItemsDTO)	{
+	@CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
+	private String orderRequest(@RequestBody List<OrderLineItemsDTO> orderLineItemsDTO)	{
 		orderService.createOrderRequest(orderLineItemsDTO);
-		return new ResponseEntity<String>("order placed successfully", HttpStatus.CREATED);
+		return "order placed successfully";
+	}
+
+	public String fallbackMethod(List<OrderLineItemsDTO> orderLineItemsDTO, RuntimeException runtimeException){
+		return "Oops! Something went wrong, please try after some time";
 	}
 }
