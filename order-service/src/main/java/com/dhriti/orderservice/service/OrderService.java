@@ -34,7 +34,7 @@ public class OrderService {
 //		this.orderRepository = orderRepository;
 //	}
 	
-	public void createOrderRequest(List<OrderLineItemsDTO> orderLineItemsDTO) {
+	public String createOrderRequest(List<OrderLineItemsDTO> orderLineItemsDTO) {
 		List<OrderLineItems> orderLineItemsList = orderLineItemsMapper.OrderLineItemstEntityTOOrderLineItemsDTO(orderLineItemsDTO);
 		Order order = new Order();
 		order.setOrderLineItems(orderLineItemsList);
@@ -49,6 +49,7 @@ public class OrderService {
 		boolean allProductsInStok = Arrays.stream(result).allMatch(inventoryResponse -> inventoryResponse.isInStock());
 		if(Boolean.TRUE.equals(allProductsInStok))	{
 			orderRepository.save(order);
+			return "Order places successfully!";
 		} else {
 			throw new IllegalArgumentException("Product is not in stock");
 

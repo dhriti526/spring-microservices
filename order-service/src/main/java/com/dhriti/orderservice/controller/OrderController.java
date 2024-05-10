@@ -1,8 +1,10 @@
 package com.dhriti.orderservice.controller;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,8 @@ import com.dhriti.orderservice.service.OrderService;
 
 @RestController
 @RequestMapping("/api/order")
+@TimeLimiter(name = "inventory")
+@Retry(name = "inventory")
 public class OrderController {
 	
 	@Autowired
@@ -24,12 +28,11 @@ public class OrderController {
 
 	@PostMapping
 	@CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
-	private String orderRequest(@RequestBody List<OrderLineItemsDTO> orderLineItemsDTO)	{
-		orderService.createOrderRequest(orderLineItemsDTO);
-		return "order placed successfully";
+	private CompletableFuture<String> orderRequest(@RequestBody List<OrderLineItemsDTO> orderLineItemsDTO)	{
+		return CompletableFuture.supplyAsync(()->orderService.createOrderRequest(orderLineItemsDTO));
 	}
 
-	public String fallbackMethod(List<OrderLineItemsDTO> orderLineItemsDTO, RuntimeException runtimeException){
-		return "Oops! Something went wrong, please try after some time";
+	public CompletableFuture<String> fallbackMethod(List<OrderLineItemsDTO> orderLineItemsDTO, RuntimeException runtimeException){
+		return CompletableFuture.supplyAsync(()->"Oops! Something went wrong, please try after some time");
 	}
 }
