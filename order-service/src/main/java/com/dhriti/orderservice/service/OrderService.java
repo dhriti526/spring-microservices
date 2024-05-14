@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.dhriti.orderservice.config.WebClientConfig;
 import com.dhriti.orderservice.orderDTO.InventoryResponse;
+import event.OrderPlacedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,8 @@ public class OrderService {
 	private final OrderLineItemsMapper orderLineItemsMapper;
 
 	private final WebClient.Builder webClientBuilder;
-	
+
+	private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
 	private final OrderRepository orderRepository;
 	
@@ -49,6 +52,7 @@ public class OrderService {
 		boolean allProductsInStok = Arrays.stream(result).allMatch(inventoryResponse -> inventoryResponse.isInStock());
 		if(Boolean.TRUE.equals(allProductsInStok))	{
 			orderRepository.save(order);
+			kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumb()));
 			return "Order places successfully!";
 		} else {
 			throw new IllegalArgumentException("Product is not in stock");
