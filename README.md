@@ -1,2 +1,2 @@
-spring-microservices application contains product service, order-service and inventory service java application
+spring-microservices contains product service, order-service, inventory service and notification-service java application
 
